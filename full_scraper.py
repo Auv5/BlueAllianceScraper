@@ -1,23 +1,36 @@
 #!/bin/env python3
 import json
-import collections
+import traceback
+import argparse
 
 from http.client import HTTPConnection
+from datetime import date
 
-def vinput(prompt, validators):
-    val = validators(input(prompt).rstrip())
-    while val == False:
-        val = validators(input(prompt).rstrip())
-    return val
+
+def vinput(prompt, validator, default=None):
+    if default:
+        prompt = prompt + ' [' + default + ']:'
+    else:
+        prompt += ':'
+    print(prompt)
+    rawin = input('\t--> ').rstrip()
+    val = validator(rawin)
+    while rawin and val == False:
+        rawin = input('\t--> ').rstrip()
+        val = validator(rawin)
+    if rawin or not default:
+        return rawin
+    else:
+        return default
+
 
 def is_integer(s, silence=False):
     try:
-        i = int(s)
+        int(s)
         return s
     except ValueError:
-        if not silence:
-            print('[ERROR] That is not a valid integer.')
         return False
+
 
 def comma_sep_ints(s, silence=False):
     if not s:
@@ -32,11 +45,14 @@ def comma_sep_ints(s, silence=False):
             return False
     return s
 
+
 def main():
-    print('Enter regional year:')
-    year = vinput('\t--> ', is_integer)
-    print('Search for regional:')
-    search = vinput('\t--> ', lambda s: s)
+    today = date.today()
+    year = today.year
+    if today.month > 3:
+       year += 1
+    year = vinput('Enter regional year', is_integer, str(year))
+    search = vinput('Search for regional', lambda s: s)
 
     print('Downloading regionals...')
 
@@ -59,8 +75,7 @@ def main():
         print('\t' + str(index) + '. ' + (m['short_name'] or m['name']) + ' on ' + m['start_date'])
         index += 1
 
-    print('\nEnter regional number:')
-    number = vinput('\t--> ', is_integer)
+    number = vinput('\nEnter regional number', is_integer, '1')
 
     regional = matches[int(number)-1]
 
@@ -98,16 +113,11 @@ def main():
         print('\t' + str(index) + '. ' + headers[index-1])
         index += 1
 
-    print('\nEnter the numbers for the information you want included (press enter for all) (Comma seperated): ')
-
-    numbers = vinput('\t--> ', comma_sep_ints)
+    numbers = vinput('\nEnter the numbers for the information you want included (comma seperated)', comma_sep_ints, ','.join(map(str, range(1, len(headers)+1))))
 
     usedheaders = []
 
     usednames = []
-
-    if not numbers:
-        numbers = ','.join(map(str,range(1,len(headers)+1)))
 
     nums = numbers.split(',')
     for n in nums:
@@ -115,9 +125,7 @@ def main():
         usedheaders.append(headers[int(n)-1])
         usednames.append(names[int(n)-1])
 
-    print('Please enter the name of the file you wish to write to:')
-
-    outfname = input('\t--> ').rstrip()
+    outfname = vinput('Please enter the name of the file you wish to write to', lambda s: s, regional['key'] + '.csv')
 
     outf = open(outfname, 'w')
 
@@ -131,5 +139,24 @@ def main():
                 outf.write(',')
         outf.write('\n')
 
+VERBOSE = False
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--verbose', help='If an error occurred, show verbose input.', action='store_true')
+
+    args = parser.parse_args()
+
+    VERBOSE = args.verbose
+    if VERBOSE:
+        print('Verbosity enabled.')
+
+    try:
+        main()
+    except:
+        if not VERBOSE:
+            print('\n\nAn error occurred. Please send me an email '
+                  '(catherine.shaw@outlook.com) with the details from --verbose. :)')
+        else:
+            traceback.print_exc()
