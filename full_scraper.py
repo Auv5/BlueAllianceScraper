@@ -157,6 +157,6 @@ if __name__ == '__main__':
     except:
         if not VERBOSE:
             print('\n\nAn error occurred. Please send me an email '
-                  '(catherine.shaw@outlook.com) with the details from --verbose. :)')
+                  '(controls.leadstu@team2994.ca) with the details from --verbose. :)')
         else:
             traceback.print_exc()
