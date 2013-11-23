@@ -102,9 +102,9 @@ def main():
 
     teamdata = json.loads(answer)
 
-    names = ['nickname', 'team_number', 'website', 'location']
+    names = ['team_number', 'nickname', 'website', 'location']
 
-    headers = ['Nickname', 'Team Number', 'Website', 'Location']
+    headers = ['Team Number', 'Nickname', 'Website', 'Location']
 
     print('\nAvailable information on teams:')
 
