@@ -134,7 +134,7 @@ def main():
     for i in teamdata:
         for h in usednames:
             if i[h]:
-                outf.write("\"" + str(i[h]) + '\",')
+                outf.write("\"" + str(i[h]).replace('"', '').replace(',', '') + '\",')
             else:
                 outf.write(',')
         outf.write('\n')
