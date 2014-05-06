@@ -6,6 +6,8 @@ import argparse
 from http.client import HTTPConnection
 from datetime import date
 
+DEF_HEADERS = {'User-Agent': 'TrueBlue bluealliance Scraper',
+        'X-TBA-App-Id': 'frc2994:scouting:v1'}
 
 def vinput(prompt, validator, default=None):
     if default:
@@ -57,7 +59,7 @@ def main():
     print('Downloading regionals...')
 
     conn = HTTPConnection('www.thebluealliance.com')
-    conn.request('GET', '/api/v1/events/list?year=' + year)
+    conn.request('GET', '/api/v1/events/list?year=' + year, headers=DEF_HEADERS)
 
     r = conn.getresponse()
     answer = r.read().decode('utf-8')
@@ -81,7 +83,7 @@ def main():
 
     print('Downloading event details...')
 
-    conn.request('GET', '/api/v1/event/details?event=' + regional['key'])
+    conn.request('GET', '/api/v1/event/details?event=' + regional['key'], headers=DEF_HEADERS)
 
     r = conn.getresponse()
 
@@ -95,7 +97,7 @@ def main():
     print('Downloading team details...')
 
     conn = HTTPConnection('www.thebluealliance.com')
-    conn.request('GET', '/api/v1/teams/show?teams=' + to_api)
+    conn.request('GET', '/api/v1/teams/show?teams=' + to_api, headers=DEF_HEADERS)
     r = conn.getresponse()
 
     answer = r.read().decode('utf-8')
